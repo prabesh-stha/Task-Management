@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:task_management_app/models/tasks.dart';
 import 'package:task_management_app/screens/date_picker.dart';
+import 'package:task_management_app/screens/home.dart';
+import 'package:task_management_app/services/task_provider.dart';
 
 class AddTask extends StatefulWidget {
   const AddTask({super.key});
@@ -9,10 +13,10 @@ class AddTask extends StatefulWidget {
 }
 
 class _AddTaskState extends State<AddTask> {
-  DateTime? _selectedDate = null;
-  GlobalKey<FormState> _key = GlobalKey<FormState>();
-  TextEditingController _titleController = TextEditingController();
-  TextEditingController _descController = TextEditingController();
+  DateTime? _selectedDate;
+  final GlobalKey<FormState> _key = GlobalKey<FormState>();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,11 +74,22 @@ class _AddTaskState extends State<AddTask> {
                 });
               }),
               const SizedBox(height: 16,),
-              ElevatedButton(style: ElevatedButton.styleFrom(
+
+              Consumer(builder: (context, WidgetRef ref, child){
+                return ElevatedButton(style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white
               ),
-              onPressed: (){}, child: const Text("Add task"))
+              onPressed: (){
+                final title = _titleController.text.trim();
+                final desc = _descController.text.trim();
+                final task = Tasks(id: title[0], title: title, description: desc, deadlineDate: _selectedDate!);
+                ref.read(taskNotifierProvider.notifier).addTask(task);
+
+                Navigator.pop(context);
+              }, child: const Text("Add task"));
+              })
+              
             ],
           )),
       )
